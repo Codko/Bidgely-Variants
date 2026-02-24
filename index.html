@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bidgely UtilityAI Interactive Energy Page</title>
+    <style>
+      /* --- Professional Energy Palette & Basic Styling --- */
+      :root {
+        --primary-blue: #0052cc;
+        --accent-green: #00d084;
+        --dark-navy: #091e42;
+        --light-bg: #f4f7f6;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--light-bg);
+        color: var(--dark-navy);
+        overflow-x: hidden;
+      }
+
+      section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 2rem;
+        border-bottom: 2px dashed #ccc;
+      }
+
+      h1 {
+        font-size: 3rem;
+        color: var(--dark-navy);
+        display: inline-block;
+        position: relative;
+        text-align: center;
+      }
+      h2 {
+        font-size: 2.2rem;
+        color: var(--primary-blue);
+        display: inline-block;
+        position: relative;
+      }
+      p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        max-width: 800px;
+        text-align: center;
+      }
+
+      /* --- Interactive Elements --- */
+      .cta-btn {
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        background-color: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          background-color 0.2s;
+        margin-top: 20px;
+        position: relative;
+        font-weight: bold;
+      }
+
+      .cta-btn:hover {
+        transform: scale(1.05);
+        background-color: #003d99;
+      }
+
+      .card-container {
+        display: flex;
+        gap: 20px;
+        margin-top: 30px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        width: 250px;
+        text-align: center;
+        z-index: 10;
+        position: relative;
+        cursor: default;
+        border-top: 4px solid var(--accent-green);
+      }
+
+      /* --- New Testimonial & FAQ Sections --- */
+      .testimonial {
+        background: white;
+        padding: 20px;
+        border-left: 5px solid var(--accent-green);
+        margin: 10px 0;
+        width: 450px;
+        font-style: italic;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      }
+
+      .faq-container {
+        width: 100%;
+        max-width: 700px;
+        margin-top: 20px;
+      }
+      .faq-item {
+        background: white;
+        margin-bottom: 15px;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        text-align: left;
+      }
+      .faq-item strong {
+        color: var(--primary-blue);
+        font-size: 1.1rem;
+      }
+      .faq-item p {
+        text-align: left;
+        margin-top: 10px;
+        font-size: 1rem;
+      }
+
+      /* --- Mascot Containers (Kept Original Logic) --- */
+      #mascot-container {
+        position: absolute;
+        top: 100px;
+        left: 0;
+        width: 120px;
+        z-index: 1000;
+        pointer-events: none;
+        transform: translate(-150px, -150px);
+      }
+
+      #anomaly-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 110px;
+        z-index: 999;
+        pointer-events: none;
+        transform: translate(-300px, -300px);
+      }
+
+      #bolt-core,
+      #anomaly-svg {
+        filter: drop-shadow(0px 8px 12px rgba(0, 82, 204, 0.4));
+        transition: filter 0.2s;
+        overflow: visible;
+        transform-origin: center center;
+      }
+
+      #bolt-core {
+        pointer-events: auto;
+        cursor: grab;
+      }
+      #bolt-core:active {
+        cursor: grabbing;
+      }
+      #bolt-core:hover {
+        filter: drop-shadow(0px 12px 20px rgba(0, 208, 132, 0.6));
+      }
+
+      /* --- Speech Bubbles --- */
+      .speech-bubble {
+        position: absolute;
+        top: -50px;
+        left: 80px;
+        background: var(--dark-navy);
+        color: white;
+        border: 2px solid var(--accent-green);
+        padding: 10px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        width: max-content;
+        max-width: 200px;
+        opacity: 0;
+        transform: scale(0.5);
+        transform-origin: bottom left;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+      }
+
+      .speech-bubble::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 15px;
+        border-width: 10px 10px 0 0;
+        border-style: solid;
+        border-color: var(--accent-green) transparent transparent transparent;
+        z-index: 5;
+      }
+
+      /* --- Interactive Chat Interface --- */
+      #chat-interface {
+        position: absolute;
+        top: -200px;
+        left: 100px;
+        background: white;
+        border: 3px solid var(--primary-blue);
+        border-radius: 15px;
+        width: 280px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        pointer-events: auto;
+        transform-origin: bottom left;
+      }
+
+      .chat-header {
+        background: var(--primary-blue);
+        color: white;
+        padding: 10px 15px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .close-chat {
+        cursor: pointer;
+        font-size: 18px;
+      }
+      .close-chat:hover {
+        color: var(--accent-green);
+      }
+      .chat-body {
+        padding: 15px;
+        font-size: 14px;
+        height: 140px;
+        overflow-y: auto;
+        background: #fafafa;
+        color: #333;
+      }
+      .chat-body p {
+        margin: 0 0 10px 0;
+        text-align: left;
+      }
+      .chat-body strong {
+        color: var(--primary-blue);
+      }
+      .chat-body .user-msg strong {
+        color: var(--accent-green);
+      }
+      .chat-input-area {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        background: white;
+      }
+      #chat-input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px 0 0 5px;
+        outline: none;
+        font-family: inherit;
+      }
+      #chat-send {
+        padding: 8px 15px;
+        background: var(--primary-blue);
+        color: white;
+        border: none;
+        border-radius: 0 5px 5px 0;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background 0.2s;
+      }
+      #chat-send:hover {
+        background: #003d99;
+      }
+
+      .controls {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1001;
+      }
+    </style>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="controls">
+      <button
+        id="start-tour"
+        class="cta-btn"
+        style="background-color: var(--accent-green); color: var(--dark-navy)"
+      >
+        Trigger Guided AI Tour
+      </button>
+    </div>
+
+    <section id="hero" class="hero-gradient">
+      <header class="main-header">
+        <div class="header-container">
+          <div class="logo">
+            <span class="logo-bolt">⚡</span>
+            <span class="logo-text"
+              >Bidgely<span class="highlight">AI</span></span
+            >
+          </div>
+
+          <nav class="nav-links">
+            <a href="#hero">Core</a>
+            <a href="#features">Solutions</a>
+            <a href="#testimonials">Impact</a>
+            <a href="#faqs">Docs</a>
+          </nav>
+
+          <div class="header-actions">
+            <div class="system-status">
+              <span class="status-dot"></span>
+              <span id="status-text">AI: STABLE</span>
+            </div>
+            <button class="cta-btn small">Client Login</button>
+          </div>
+        </div>
+      </header>
+      <div class="content-wrapper">
+        <h1 id="hero-title">
+          Smart Energy Decisions for <br /><span class="highlight"
+            >Utilities & Customers</span
+          >
+        </h1>
+        <p class="hero-subtitle">
+          Bidgely leverages the power of data and analytics to accelerate the
+          clean energy future. From EV orchestration to grid intelligence, we
+          turn data into actionable insights for 35+ top global utilities.
+        </p>
+        <div class="hero-stats">
+          <div class="stat">
+            <strong>1TWh+</strong><span>Energy Saved</span>
+          </div>
+          <div class="stat">
+            <strong>90%</strong><span>EV Detection Accuracy</span>
+          </div>
+          <div class="stat">
+            <strong>70%</strong><span>Peak Load Shift</span>
+          </div>
+        </div>
+        <div class="btn-group">
+          <button class="cta-btn" id="hero-btn">Start System Scan</button>
+          <button class="cta-btn secondary">View Whitepaper</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>UtilityAI™ Solutions</h2>
+      <div class="card-container">
+        <div class="feature-card">
+          <h3 style="color: var(--primary-blue)">EV & DER Management</h3>
+          <p>
+            Detect EVs with 90% accuracy and manage charging to shift 70% of
+            on-peak load.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3 style="color: var(--primary-blue)">Appliance-Level Insights</h3>
+          <p>
+            Identify HVAC, Water Heater, and laundry usage without sub-metering
+            or hardware.
+          </p>
+        </div>
+        <div class="feature-card">
+          <h3 style="color: var(--primary-blue)">Grid Intelligence</h3>
+          <p>
+            Harness GenAI to predict distribution transformer load and enhance
+            grid reliability.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials" class="test-1">
+      <div class="section-header">
+        <span class="eyebrow">Sector Leadership</span>
+        <h2>What the Industry Says</h2>
+      </div>
+      <div class="testimonial-grid">
+        <div id="test-1" class="testimonial-card">
+          <div class="quote-icon">“</div>
+          <p>
+            "Bidgely's UtilityAI platform provides the granularity we need to
+            engage customers and meet our energy efficiency targets without
+            hardware costs."
+          </p>
+          <div class="author">
+            <div class="avatar"></div>
+            <div>
+              <strong>Executive Insights</strong>
+              <span>Leading US Utility Partner</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faqs">
+      <div class="section-header">
+        <h2>Technical Specification FAQ</h2>
+        <p>Deep dive into our AI architecture and data security protocols.</p>
+      </div>
+      <div class="faq-container">
+        <div class="faq-item">
+          <h3>How does non-intrusive load monitoring (NILM) work?</h3>
+          <p>
+            Our proprietary NILM algorithms analyze high-frequency current and
+            voltage signatures. By identifying the unique "electrical
+            fingerprint" of devices—like a compressor starting in an AC or the
+            pulse-width modulation of an EV charger—we can separate total house
+            load into individual appliance categories.
+          </p>
+        </div>
+        <div class="faq-item">
+          <h3>What is the data latency for grid-side analytics?</h3>
+          <p>
+            Bidgely supports both batch processing (24-hour intervals) and near
+            real-time streams via HAN (Home Area Network) devices, providing
+            insights in as little as 5-15 minute intervals for active demand
+            response events.
+          </p>
+        </div>
+        <div class="faq-item">
+          <h3>Is the platform SOC-2 Compliant?</h3>
+          <p>
+            Yes. Data privacy is our cornerstone. All PII (Personally
+            Identifiable Information) is encrypted at rest and in transit using
+            AES-256. We never sell consumer data; our models are built for
+            utility-consumer optimization only.
+          </p>
+        </div>
+        <div class="faq-item">
+          <h3>
+            Can Bidgely detect behind-the-meter Solar and Battery storage?
+          </h3>
+          <p>
+            Absolutely. Our AI distinguishes between negative load (generation)
+            and reduced consumption, allowing utilities to map true DER
+            (Distributed Energy Resource) penetration across the distribution
+            transformer level.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div id="anomaly-container">
+      <div
+        id="anomaly-bubble"
+        class="speech-bubble"
+        style="background: #e00015; border-color: #333"
+      >
+        Alert! Voltage Spike!
+      </div>
+      <svg id="anomaly-svg" viewBox="0 0 100 130">
+        <path
+          d="M50 20 L20 100 L80 100 Z"
+          fill="#E00015"
+          stroke="#333"
+          stroke-width="3"
+        />
+        <circle cx="50" cy="70" r="8" fill="#FFF" />
+        <rect x="46" y="45" width="8" height="15" fill="#FFF" />
+      </svg>
+    </div>
+
+    <div id="mascot-container">
+      <div id="speech-bubble" class="speech-bubble">System Online.</div>
+
+      <div id="chat-interface">
+        <div class="chat-header">
+          <span>Chat with Bidgely-AI</span>
+          <span class="close-chat" onclick="closeChat()">✖</span>
+        </div>
+        <div class="chat-body" id="chat-body">
+          <p>
+            <strong>Bidgely-AI:</strong> Grid connected. Type 'data',
+            'algorithm', or 'anomaly' to test systems.
+          </p>
+        </div>
+        <div class="chat-input-area">
+          <input
+            type="text"
+            id="chat-input"
+            placeholder="Try 'algorithm'..."
+            autocomplete="off"
+          />
+          <button id="chat-send">Send</button>
+        </div>
+      </div>
+
+      <svg id="bolt-core" viewBox="0 0 100 130" style="overflow: visible">
+        <defs>
+          <linearGradient id="boltGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00FFFF" />
+            <stop offset="40%" stop-color="#00D084" />
+            <stop offset="100%" stop-color="#0052CC" />
+          </linearGradient>
+          <linearGradient id="innerGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        <g id="sparks" opacity="0"></g>
+
+        <g id="main-body" filter="url(#glow)">
+          <path
+            d="M55 5 L20 75 L45 75 L35 125 L80 60 L55 60 Z"
+            fill="#091E42"
+            transform="translate(3, 3)"
+          />
+          <path
+            id="bolt-path"
+            d="M55 5 L20 75 L45 75 L35 125 L80 60 L55 60 Z"
+            fill="url(#boltGrad)"
+            stroke="#FFFFFF"
+            stroke-width="1.5"
+          />
+          <path
+            d="M55 5 L20 75 L45 75 Z"
+            fill="url(#innerGlow)"
+            opacity="0.6"
+          />
+        </g>
+
+        <!-- Limbs added for animations -->
+
+        <g id="eyes">
+          <rect x="38" y="45" width="24" height="6" rx="3" fill="#091E42" />
+          <circle cx="43" cy="48" r="2" fill="#00FFFF" filter="url(#glow)" />
+          <circle cx="57" cy="48" r="2" fill="#00FFFF" filter="url(#glow)" />
+        </g>
+      </svg>
+    </div>
+
+    <!-- External Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
