@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoltGrid - Smart Energy Solutions</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    /* --- Theme Variables --- */
+    :root {
+      --bg-dark: #0a1128;
+      --bg-darker: #050a18;
+      --electric-orange: #FF9D00;
+      --electric-gold: #FFD700;
+      --electric-blue: #00f3ff;
+      --text-light: #e0e0e0;
+      --grid-line: rgba(255, 157, 0, 0.15);
+    }
+
+    /* --- Basic Page Styling & Background Grid --- */
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+      overflow-x: hidden;
+      background-image: 
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+        radial-gradient(circle at center, #1a2a4f 0%, var(--bg-darker) 80%);
+      background-size: 50px 50px, 50px 50px, 100% 100%;
+      background-position: center center;
+    }
+    
+    section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+      border-bottom: 1px solid rgba(255, 157, 0, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    h1, h2 { 
+      color: var(--electric-orange); 
+      text-transform: uppercase; 
+      letter-spacing: 2px;
+      text-shadow: 0 0 15px rgba(255, 157, 0, 0.6);
+      text-align: center;
+    }
+    
+    h1 { font-size: 3.5rem; font-weight: 800; }
+    p { font-size: 1.1rem; max-width: 600px; text-align: center; color: #b0b8c4; }
+
+    /* --- Interactive Elements --- */
+    .cta-btn {
+      padding: 15px 35px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--electric-orange), var(--electric-gold));
+      color: var(--bg-darker);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 30px;
+      box-shadow: 0 0 15px rgba(255, 157, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-btn:hover { 
+      transform: translateY(-3px); 
+      box-shadow: 0 0 35px rgba(255, 157, 0, 0.8);
+    }
+
+    .card-container {
+      display: flex;
+      gap: 30px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 157, 0, 0.3);
+      padding: 30px;
+      border-radius: 8px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      width: 280px;
+      text-align: center;
+      z-index: 10;
+      position: relative;
+      cursor: default;
+      transition: border-color 0.3s;
+    }
+    
+    .feature-card:hover { border-color: var(--electric-orange); }
+    .feature-card h3 { color: var(--electric-gold); margin-bottom: 15px; }
+
+    .testimonial {
+      background: rgba(26, 42, 79, 0.6);
+      padding: 25px;
+      border-left: 4px solid var(--electric-orange);
+      margin: 15px 0;
+      width: 450px;
+      font-style: italic;
+      border-radius: 0 8px 8px 0;
+    }
+
+    /* --- Mascot Container --- */
+    #mascot-container {
+      position: absolute; 
+      top: 0; 
+      left: 0;
+      width: 140px; 
+      height: 140px;
+      z-index: 1000;
+      pointer-events: none; 
+      transform: translate(-200px, -200px); 
+    }
+
+    #spark-mascot {
+      pointer-events: auto; 
+      cursor: grab;
+      overflow: visible; 
+      transform-origin: center center;
+      filter: drop-shadow(0px 0px 10px var(--electric-orange));
+      transition: filter 0.2s;
+    }
+
+    #spark-mascot:active { cursor: grabbing; }
+    #spark-mascot:hover { filter: drop-shadow(0px 0px 20px var(--electric-gold)); }
+
+    /* --- Speech Bubble --- */
+    .speech-bubble {
+      position: absolute;
+      top: -60px;
+      left: 100px; 
+      background: var(--bg-darker);
+      border: 1px solid var(--electric-orange);
+      color: var(--electric-gold);
+      padding: 12px 18px;
+      border-radius: 4px; 
+      font-size: 14px;
+      font-family: 'Share Tech Mono', monospace; 
+      width: max-content;
+      max-width: 220px;
+      opacity: 0;
+      transform: scale(0.5);
+      transform-origin: bottom left;
+      box-shadow: 0 0 15px rgba(255, 157, 0, 0.3);
+      pointer-events: none;
+    }
+    
+    .speech-bubble::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 15px;
+      border-width: 8px 8px 0 0;
+      border-style: solid;
+      border-color: var(--electric-orange) transparent transparent transparent;
+    }
+
+    /* --- Mega Dashboard Interface --- */
+    #dashboard-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 10, 24, 0.85); 
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+    }
+
+    #chat-interface {
+      width: 90%; 
+      max-width: 1150px; 
+      height: 70vh;
+      background: rgba(10, 17, 40, 0.95);
+      border: 1px solid var(--electric-blue);
+      box-shadow: 0 0 50px rgba(0, 243, 255, 0.15), inset 0 0 100px rgba(0,0,0,0.5);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #chat-interface::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--electric-blue), transparent);
+    }
+
+    .chat-header {
+      background: rgba(0, 243, 255, 0.1);
+      color: var(--electric-blue);
+      padding: 20px 30px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
+      border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      text-transform: uppercase;
+    }
+
+    .close-chat {
+      cursor: pointer;
+      font-size: 24px;
+      transition: color 0.3s;
+    }
+    .close-chat:hover { color: var(--electric-orange); }
+
+    .chat-body {
+      flex: 1;
+      padding: 40px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.1rem;
+      overflow-y: auto;
+      color: #aab;
+      background-image: linear-gradient(rgba(0, 243, 255, 0.03) 1px, transparent 1px);
+      background-size: 100% 30px;
+    }
+
+    .chat-body p { margin-bottom: 20px; line-height: 1.6; }
+    .chat-body strong { color: var(--electric-orange); }
+    .chat-body .user-msg strong { color: var(--electric-blue); }
+
+    .chat-input-area {
+      padding: 20px 30px;
+      background: rgba(0,0,0,0.5);
+      border-top: 1px solid rgba(0, 243, 255, 0.3);
+      display: flex;
+      gap: 15px;
+    }
+
+    #chat-input {
+      flex: 1;
+      padding: 15px;
+      background: rgba(0, 243, 255, 0.05);
+      border: 1px solid rgba(0, 243, 255, 0.3);
+      color: var(--electric-blue);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      border-radius: 4px;
+      outline: none;
+    }
+    #chat-input:focus { border-color: var(--electric-orange); }
+
+    #chat-send {
+      padding: 0 40px;
+      background: var(--electric-blue);
+      color: var(--bg-darker);
+      border: none;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.2s;
+    }
+    #chat-send:hover { background: var(--electric-orange); }
+
+    .quick-commands {
+      display: flex;
+      gap: 10px;
+      padding: 10px 30px 0;
+      background: rgba(0,0,0,0.3);
+    }
+    .cmd-btn {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #889;
+      padding: 5px 15px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 4px;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .cmd-btn:hover { border-color: var(--electric-blue); color: var(--electric-blue); }
+
+    /* --- Utility --- */
+    .controls {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1001;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="controls">
+    <button id="start-tour" class="cta-btn">Activate Guided Tour</button>
+  </div>
+
+  <section id="hero">
+    <h1 id="hero-title">Powering Tomorrow's Grid</h1>
+    <p>Next-generation utility infrastructure and smart energy management systems.</p>
+    <button class="cta-btn" id="hero-btn">View Solutions</button>
+  </section>
+
+  <section id="features">
+    <h2>Intelligent Infrastructure</h2>
+    <div class="card-container">
+      <div class="feature-card" data-topic="metering">
+        <h3>Smart Metering</h3>
+        <p>Real-time consumption data and automated reporting.</p>
+      </div>
+      <div class="feature-card" data-topic="reliability">
+        <h3>Grid Reliability</h3>
+        <p>Self-healing network technology for maximum uptime.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="testimonials">
+    <h2>Client Success</h2>
+    <div class="testimonial" id="test-1">
+      "VoltGrid's AI analytics reduced our downtime by 40%." - Metro Utility Corp
+    </div>
+    <div class="testimonial">
+      "The transition to their smart grid platform was seamless." - Regional Power
+    </div>
+  </section>
+
+  <div id="mascot-container">
+    <div id="speech-bubble" class="speech-bubble">Systems Online.</div>
+    <svg id="spark-mascot" viewBox="0 0 100 100">
+      <defs>
+        <linearGradient id="bolt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#FF9D00;stop-opacity:1" />
+        </linearGradient>
+        <filter id="inner-glow">
+           <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+           <feMerge>
+               <feMergeNode in="coloredBlur"/>
+               <feMergeNode in="SourceGraphic"/>
+           </feMerge>
+        </filter>
+      </defs>
+      <g id="spark-rings" opacity="0.7">
+        <ellipse cx="50" cy="50" rx="45" ry="15" stroke="#FFD700" stroke-width="2" fill="none" transform="rotate(-20 50 50)"/>
+        <ellipse cx="50" cy="50" rx="45" ry="15" stroke="#FF9D00" stroke-width="2" fill="none" transform="rotate(45 50 50)"/>
+        <ellipse cx="50" cy="50" rx="55" ry="2" stroke="#00f3ff" stroke-width="1" fill="none" transform="rotate(90 50 50)" opacity="0.5"/>
+      </g>
+      <g id="spark-core" filter="url(#inner-glow)">
+          <path d="M55 5 L65 40 L90 40 L45 95 L55 60 L30 60 Z" fill="url(#bolt-grad)" stroke="#FFF" stroke-width="1"/>
+          <circle cx="50" cy="50" r="8" fill="#FFF" opacity="0.8" />
+      </g>
+    </svg>
+  </div>
+
+  <div id="dashboard-overlay">
+    <div id="chat-interface">
+      <div class="chat-header">
+        <span>Bidgley Command Center v2.4</span>
+        <span class="close-chat" onclick="closeChat()">[CLOSE]</span>
+      </div>
+      <div class="quick-commands">
+        <button class="cmd-btn" onclick="runCmd('status')">System Status</button>
+        <button class="cmd-btn" onclick="runCmd('optimize')">Optimize Grid</button>
+        <button class="cmd-btn" onclick="runCmd('outages')">Check Outages</button>
+        <button class="cmd-btn" onclick="runCmd('billing')">Billing Projection</button>
+      </div>
+      <div class="chat-body" id="chat-body">
+        <p><strong>Bidgley:</strong> Secure connection established. How may I assist you with the grid today?</p>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input" placeholder="Enter command protocol..." autocomplete="off" />
+        <button id="chat-send">EXECUTE</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+  
+  <script>
+    // --- Setup & Utilities ---
+    const mascot = document.getElementById('mascot-container');
+    const bubble = document.getElementById('speech-bubble');
+    const dashboardOverlay = document.getElementById('dashboard-overlay');
+    const chatBody = document.getElementById('chat-body');
+    const chatInput = document.getElementById('chat-input');
+    const chatSend = document.getElementById('chat-send');
+    
+    let isTourActive = false;
+    let isChatOpen = false;
+    let currentSection = ''; 
+
+    // --- Voice Setup ---
+    const synth = window.speechSynthesis;
+    let voiceHasBeenTriggered = false; 
+    
+    function speakOutLoud(text) {
+      if (!synth) return;
+      if (synth.speaking) synth.cancel();
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.pitch = 1.2; 
+      utterance.rate = 1.3;  
+      
+      const voices = synth.getVoices();
+      const roboticVoice = voices.find(v => v.lang === 'en-US' && !v.name.includes('Natural'));
+      if (roboticVoice) utterance.voice = roboticVoice;
+
+      synth.speak(utterance);
+    }
+
+    function moveToElement(element, offsetX = 0, offsetY = 0, duration = 1) {
+      const rect = element.getBoundingClientRect();
+      const absoluteTop = window.scrollY + rect.top;
+      const absoluteLeft = window.scrollX + rect.left;
+
+      gsap.to(mascot, {
+        x: absoluteLeft + offsetX,
+        y: absoluteTop + offsetY,
+        duration: duration,
+        ease: "power3.inOut" 
+      });
+    }
+
+    function speak(text, duration = 2) {
+      if (isChatOpen) return;
+      bubble.innerText = text;
+      gsap.to(bubble, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out" });
+      
+      if (voiceHasBeenTriggered) {
+        speakOutLoud(text); 
+      }
+
+      if(window.bubbleTimeout) clearTimeout(window.bubbleTimeout);
+      window.bubbleTimeout = setTimeout(() => {
+        gsap.to(bubble, { opacity: 0, scale: 0.5, duration: 0.3 });
+      }, duration * 1000);
+    }
+
+    // --- Proactive AI Logic ---
+    const helpfulPhrases = [
+      "I am here if you require assistance.",
+      "Grid efficiency is at 99%.",
+      "Would you like a system report?",
+      "I can optimize your viewing experience.",
+      "Monitoring power levels...",
+      "Ready for command input.",
+      "Systems nominal. Standing by."
+    ];
+
+    setInterval(() => {
+      if (!isChatOpen && !isTourActive && !Draggable.get(mascot).isDragging && voiceHasBeenTriggered) {
+         if(Math.random() > 0.7) {
+            const randomPhrase = helpfulPhrases[Math.floor(Math.random() * helpfulPhrases.length)];
+            speak(randomPhrase, 2.5);
+            gsap.to("#spark-core", { scale: 1.3, duration: 0.2, yoyo: true, repeat: 1 });
+         }
+      }
+    }, 15000);
+
+    // --- Draggable Setup ---
+    let dragVibrateTween;
+    Draggable.create(mascot, {
+      type: "x,y",
+      trigger: "#spark-mascot", 
+      bounds: "body", 
+      onDragStart: function() {
+        if (isTourActive) return;
+        voiceHasBeenTriggered = true;
+        isIdle = true; 
+        clearTimeout(idleTimer);
+        dragVibrateTween = gsap.to("#spark-core", { 
+          x: "+=3", y: "-=2", yoyo: true, repeat: -1, duration: 0.05 
+        });
+        speak("Discharge imminent! Release me.", 2.5);
+      },
+      onDragEnd: function() {
+        if (dragVibrateTween) dragVibrateTween.kill();
+        gsap.to("#spark-core", { x: 0, y: 0, duration: 0.2 });
+        isIdle = false;
+        resetIdleTimer();
+      },
+      onClick: function() {
+        if (isTourActive) return;
+        openChat();
+      }
+    });
+
+    function openChat() {
+      isChatOpen = true;
+      voiceHasBeenTriggered = true; 
+      
+      gsap.to(bubble, { opacity: 0, scale: 0.5, duration: 0.1 }); 
+      
+      dashboardOverlay.style.display = 'flex';
+      gsap.to(dashboardOverlay, { opacity: 1, duration: 0.3 });
+      
+      gsap.fromTo("#chat-interface", 
+        { scale: 0.9, opacity: 0, y: 20 }, 
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.1)" }
+      );
+      
+      speakOutLoud("Command Center Interface Loaded.");
+      chatInput.focus();
+    }
+
+    function closeChat() {
+      gsap.to("#chat-interface", { scale: 0.9, opacity: 0, y: 20, duration: 0.3 });
+      gsap.to(dashboardOverlay, { 
+        opacity: 0, 
+        duration: 0.3, 
+        delay: 0.1,
+        onComplete: () => {
+          dashboardOverlay.style.display = 'none';
+          isChatOpen = false;
+        }
+      });
+    }
+
+    // --- Chat Logic Engine ---
+    function runCmd(cmd) {
+      chatInput.value = cmd;
+      processUserMessage();
+    }
+
+    function processUserMessage() {
+      const originalText = chatInput.value.trim();
+      const text = originalText.toLowerCase();
+      if(!text) return;
+
+      chatBody.innerHTML += `<p class="user-msg"><strong>Admin:</strong> ${originalText}</p>`;
+      chatInput.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      let response = "Command not recognized. Please verify syntax.";
+
+      if (text.includes('status') || text.includes('report')) {
+        response = "Grid status: Nominal. Load balanced at 88%. No anomalies detected in Sector 4.";
+      } else if (text.includes('optimize')) {
+         response = "Optimization algorithm initiated... Distribution efficiency improved by 4.2%.";
+      } else if (text.includes('outages')) {
+         response = "Scanning... No outages reported in your immediate vicinity. 1 minor fluctuation detected in District 9.";
+      } else if (text.includes('billing')) {
+         response = "Current cycle projection: 450 kWh. Estimated efficiency savings: $12.40.";
+      } else if (text.includes('grid') || text.includes('power')) {
+        response = "Rerouting auxiliary power to sector 7G. Stand by.";
+        gsap.to("#spark-mascot", { rotation: 720, duration: 1, ease: "power2.inOut" });
+        gsap.fromTo("#spark-mascot", { filter: "drop-shadow(0px 0px 50px #FFF)" }, { filter: "drop-shadow(0px 0px 10px #FF9D00)", duration: 1, delay: 0.5 });
+      } else if (text.includes('help')) {
+        response = "Available protocols: STATUS, OPTIMIZE, OUTAGES, BILLING.";
+      } else if (text.includes('hello') || text.includes('hi')) {
+        response = "Bidgley unit online. How may I assist with grid operations?";
+      }
+
+      setTimeout(() => {
+        chatBody.innerHTML += `<p><strong>Bidgley:</strong> ${response}</p>`;
+        chatBody.scrollTop = chatBody.scrollHeight;
+        speakOutLoud(response);
+      }, 500); 
+    }
+
+    chatSend.addEventListener('click', processUserMessage);
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') processUserMessage();
+    });
+
+    // --- Idle Random Movement Engine ---
+    let idleTimer;
+    let isIdle = false;
+    let idleWalkTimeout;
+    let mainWalkTween;
+    const idleTimeoutLimit = 5000; 
+
+    function triggerIdleState() {
+      if (isTourActive || isChatOpen || this.isDragging) return;
+      isIdle = true;
+      speak("Initiating perimeter patrol.", 2.5);
+      doRandomFloat();
+    }
+
+    function doRandomFloat() {
+      if (!isIdle) return;
+      
+      const targetX = Math.max(50, Math.random() * (window.innerWidth - 200));
+      const targetY = window.scrollY + Math.max(100, Math.random() * (window.innerHeight - 200));
+      const currentX = gsap.getProperty(mascot, "x");
+      
+      const dist = Math.hypot(targetX - currentX, targetY - gsap.getProperty(mascot, "y"));
+      const duration = Math.max(2, dist / 80); 
+
+      const tilt = targetX > currentX ? 15 : -15;
+      gsap.to("#spark-mascot", { rotation: tilt, duration: 0.5 }); 
+
+      mainWalkTween = gsap.to(mascot, {
+        x: targetX,
+        y: targetY,
+        duration: duration,
+        ease: "sine.inOut", 
+        onComplete: () => {
+           gsap.to("#spark-mascot", { rotation: 0, duration: 0.5 }); 
+          idleWalkTimeout = setTimeout(() => doRandomFloat(), 2000 + Math.random() * 3000);
+        }
+      });
+    }
+
+    function resetIdleTimer() {
+      clearTimeout(idleTimer);
+      if (isIdle) {
+        isIdle = false;
+        clearTimeout(idleWalkTimeout);
+        if (mainWalkTween) mainWalkTween.kill();
+        gsap.to("#spark-mascot", { rotation: 0, duration: 0.4 });
+        const centerViewport = window.scrollY + (window.innerHeight / 2) - 70;
+        gsap.to(mascot, {
+          y: window.scrollY > 50 ? centerViewport : window.scrollY + 80, 
+          x: 50,
+          duration: 1.2,
+          ease: "power3.out"
+        });
+      }
+      idleTimer = setTimeout(triggerIdleState, idleTimeoutLimit);
+    }
+
+    window.addEventListener('mousemove', resetIdleTimer);
+    window.addEventListener('scroll', resetIdleTimer);
+    window.addEventListener('click', resetIdleTimer);
+    window.addEventListener('keypress', resetIdleTimer);
+
+    // --- NEW: Card Hover Facts Logic ---
+    const infrastructureFacts = {
+      'metering': [
+        "Fact: Smart meters prevent 99% of billing errors.",
+        "Data is encrypted and transmitted every 15 minutes.",
+        "IoT sensors allow for immediate tampering detection.",
+        "Real-time analytics help flatten peak load demand."
+      ],
+      'reliability': [
+        "Self-healing grids restore power in under 60 seconds.",
+        "AI predicts 80% of potential transformer failures.",
+        "Micro-grid islanding protects critical hospital infrastructure.",
+        "Harmonic distortion is monitored 24/7."
+      ]
+    };
+
+    const cards = document.querySelectorAll('.feature-card');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        if (isTourActive || isChatOpen || isIdle || Draggable.get(mascot).isDragging) return;
+        
+        // Visuals
+        moveToElement(card, -90, 30, 0.6); 
+        gsap.to("#doraemon", { opacity: 0.3, scale: 0.7, x: -30, duration: 0.5 });
+        
+        // Facts Logic
+        const topic = card.getAttribute('data-topic');
+        if (topic && infrastructureFacts[topic]) {
+            const facts = infrastructureFacts[topic];
+            const randomFact = facts[Math.floor(Math.random() * facts.length)];
+            speak(randomFact, 4);
+        }
+      });
+      card.addEventListener('mouseleave', () => {
+        if (isTourActive || isChatOpen || isIdle || Draggable.get(mascot).isDragging) return;
+        gsap.to("#doraemon", { opacity: 1, scale: 1, x: 0, duration: 0.5 });
+      });
+    });
+
+    // --- Default Animations ---
+    gsap.to("#spark-rings", { rotation: 360, transformOrigin: "50px 50px", duration: 15, repeat: -1, ease: "linear" });
+    gsap.to("#spark-core", { scale: 1.05, transformOrigin: "50px 50px", duration: 1.5, repeat: -1, yoyo: true, ease: "sine.inOut" });
+    gsap.to("#spark-mascot", { y: "+=15", repeat: -1, yoyo: true, ease: "sine.inOut", duration: 2.5 });
+
+    // --- Initial Entry ---
+    gsap.to(mascot, { 
+      x: 50, 
+      y: window.scrollY + 80, 
+      duration: 2.5, 
+      ease: "power4.out", 
+      delay: 0.5,
+      onComplete: () => {
+        speak("Bidgley online. Systems nominal.", 3);
+        resetIdleTimer();
+      }
+    });
+
+    // --- Button Hover Hooks ---
+    const buttons = document.querySelectorAll('.cta-btn:not(#start-tour)');
+    buttons.forEach(btn => {
+      btn.addEventListener('mouseenter', () => {
+        if (isTourActive || isChatOpen || isIdle || Draggable.get(mascot).isDragging) return;
+        moveToElement(btn, (btn.offsetWidth / 2) - 70, -110, 0.6); 
+        gsap.to("#spark-mascot", { rotation: 10, scale: 1.1, duration: 0.3 });
+        gsap.to("#spark-mascot", { filter: "drop-shadow(0px 0px 25px #FFD700)", duration: 0.3 });
+        speak("Execute command?", 1.5); 
+      });
+      btn.addEventListener('mouseleave', () => {
+        if (isTourActive || isChatOpen || isIdle || Draggable.get(mascot).isDragging) return;
+        gsap.to("#spark-mascot", { rotation: 0, scale: 1, duration: 0.3 });
+        gsap.to("#spark-mascot", { filter: "drop-shadow(0px 0px 10px #FF9D00)", duration: 0.3 });
+      });
+    });
+
+    const sections = document.querySelectorAll('section');
+    sections.forEach(section => {
+      section.addEventListener('mouseenter', () => {
+        if (isTourActive || isChatOpen || isIdle || Draggable.get(mascot).isDragging) return;
+        if (currentSection !== section.id) {
+          currentSection = section.id;
+        }
+      });
+    });
+
+    // Scroll Reaction
+    window.addEventListener('scroll', () => {
+      if (isTourActive || isIdle || Draggable.get(mascot).isDragging) return;
+      const centerViewport = window.scrollY + (window.innerHeight / 2) - 70;
+      gsap.to(mascot, {
+        y: window.scrollY > 50 ? centerViewport : window.scrollY + 80, 
+        x: 50,
+        duration: 0.8,
+        ease: "power2.out"
+      });
+    });
+
+    // Tour Logic
+    document.getElementById('start-tour').addEventListener('click', () => {
+      if (isTourActive) return;
+      if (isChatOpen) closeChat();
+      isTourActive = true;
+      voiceHasBeenTriggered = true; 
+      gsap.to("#spark-mascot", { rotation: 0, opacity: 1, scale: 1, duration: 0.5 });
+      const tl = gsap.timeline({
+        onComplete: () => {
+          isTourActive = false;
+          currentSection = ''; 
+          speak("Diagnostic sequence complete. Resuming standby.", 3);
+          gsap.to(mascot, { 
+            x: 50, 
+            y: window.scrollY + (window.innerHeight / 2) - 70, 
+            duration: 1.2, 
+            ease: "power3.out" 
+          });
+        }
+      });
+      tl.add(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        moveToElement(document.getElementById('hero-title'), -140, -60);
+        speak("Initiating system overview protocol.", 2.5);
+      }, "+=0.5")
+      .add(() => {
+        document.getElementById('features').scrollIntoView({ behavior: 'smooth' });
+        moveToElement(document.querySelector('.card-container'), -60, -100);
+        speak("Scanning core grid functionalities.", 2.5);
+      }, "+=3")
+      .add(() => {
+        document.getElementById('testimonials').scrollIntoView({ behavior: 'smooth' });
+        moveToElement(document.getElementById('test-1'), -120, -30);
+        speak("Verifying external user feedback logs.", 2.5);
+      }, "+=3")
+      .add(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        moveToElement(document.getElementById('hero-btn'), 90, -100);
+        speak("Awaiting manual override command.", 3);
+      }, "+=3");
+    });
+  </script>
+</body>
+</html>
